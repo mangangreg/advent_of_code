@@ -45,16 +45,13 @@ class Forest:
 
         return viewing_distance
 
-def part1(inpath):
-    input_rows = [line.strip() for line in open(inpath).readlines()]
-    forest = Forest(input_rows)
+def part1(forest):
     return sum(forest.tree_visible(*coords) for coords in forest.treemap)
 
-def part2(inpath):
-    input_rows = [line.strip() for line in open(inpath).readlines()]
-    forest = Forest(input_rows)
+def part2(forest):
     return max(forest.viewing_distance(*coords) for coords in forest.treemap)
 
 inpath = 'day8_input.txt'
-print(part1(inpath))
-print(part2(inpath))
+forest = Forest( [line.strip() for line in open(inpath).readlines()] )
+print(part1(forest))
+print(part2(forest))
