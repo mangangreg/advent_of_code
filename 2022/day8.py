@@ -1,7 +1,4 @@
-
-from operator import truediv
-
-
+DIRECTIONS = ['up', 'down', 'left', 'right']
 class Forest:
     def __init__(self, input_rows):
         self.n_rows = len(input_rows)
@@ -14,41 +11,50 @@ class Forest:
     def is_edge(self, row, col):
         return row in (0, self.n_rows-1) or col in (0, self.n_columns-1) 
 
+    def trees_in_direction(self, row, col, direction):
+        ''' The sequence of tree heights in the given direction'''
+        if direction == 'left':
+            return reversed([self.treemap[row,x] for x in range(0,col)])
+        if direction == 'right':
+            return [self.treemap[row,x] for x in range(col+1,self.n_columns)] 
+        if direction == 'up':
+            return reversed([self.treemap[x,col] for x in range(0,row)])
+        if direction == 'down':
+            return [self.treemap[x,col] for x in range(row+1, self.n_rows)]
+
     def tree_visible(self, row, col):
-        try:
-            if self.is_edge(row,col):
+        if self.is_edge(row,col):
+            return True
+        for direction in DIRECTIONS:
+            if self.treemap[row,col] > max(self.trees_in_direction(row,col,direction)):
                 return True
+        return False
+    
+    def viewing_distance(self, row, col):
+        if self.is_edge(row,col):
+            return 0
+        viewing_distance = 1
 
-            # from left
-            elif self.treemap[row,col] > max(self.treemap[row,x] for x in range(0,col)):
-                return True
+        for direction in DIRECTIONS:
+            direction_distance = 0
+            for height in self.trees_in_direction(row,col,direction):
+                direction_distance += 1
+                if height >= self.treemap[row,col]:
+                    break 
+            viewing_distance *= direction_distance
 
-            # from right
-            elif self.treemap[row,col] > max(self.treemap[row,x] for x in range(col+1,self.n_columns)):
-                return True
-            
-            # from top
-            elif self.treemap[row,col] > max(self.treemap[x,col] for x in range(0,row)):
-                return True
-            
-            # from bottom
-            elif self.treemap[row,col] > max(self.treemap[x,col] for x in range(row+1, self.n_rows)):
-                return True
+        return viewing_distance
 
-            return False
-        except:
-            print('problem with', row, col)
-            raise
-
-
-def part1():
-    inpath = 'day8_input.txt'
+def part1(inpath):
     input_rows = [line.strip() for line in open(inpath).readlines()]
     forest = Forest(input_rows)
-    # import pdb;pdb.set_trace()
-    res = sum(forest.tree_visible(*coords) for coords in forest.treemap)
-    return res
+    return sum(forest.tree_visible(*coords) for coords in forest.treemap)
 
+def part2(inpath):
+    input_rows = [line.strip() for line in open(inpath).readlines()]
+    forest = Forest(input_rows)
+    return max(forest.viewing_distance(*coords) for coords in forest.treemap)
 
-res1 = part1()
-print(res1)
+inpath = 'day8_input.txt'
+print(part1(inpath))
+print(part2(inpath))
